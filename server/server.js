@@ -17,27 +17,34 @@ const chatRoutes = require('./routes/chatRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
+// ✅ Allowed origins (IMPORTANT FIX)
+const allowedOrigins = [
+    "http://localhost:3000",
+    "https://loopify-wi9n.vercel.app"
+];
+
 // Initialize app
 const app = express();
 const server = http.createServer(app);
 
-// Socket.IO setup
+// ✅ Socket.IO setup (FIXED)
 const io = new Server(server, {
     cors: {
-        origin: process.env.CLIENT_URL || 'http://localhost:3000',
+        origin: allowedOrigins,
         methods: ['GET', 'POST']
     }
 });
 
-// Middleware
+// ✅ Middleware (FIXED CORS)
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: allowedOrigins,
     credentials: true
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded files in development
+// Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
@@ -62,14 +69,12 @@ const onlineUsers = new Map();
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
-    // User joins with their userId
     socket.on('join', (userId) => {
         onlineUsers.set(userId, socket.id);
         socket.userId = userId;
         io.emit('onlineUsers', Array.from(onlineUsers.keys()));
     });
 
-    // Handle chat messages
     socket.on('sendMessage', async (data) => {
         try {
             const { senderId, receiverId, content } = data;
@@ -86,20 +91,17 @@ io.on('connection', (socket) => {
                 .populate('sender', 'name profilePhoto')
                 .populate('receiver', 'name profilePhoto');
 
-            // Send to receiver if online
             const receiverSocket = onlineUsers.get(receiverId);
             if (receiverSocket) {
                 io.to(receiverSocket).emit('newMessage', populated);
             }
 
-            // Confirm to sender
             socket.emit('messageSent', populated);
         } catch (error) {
             socket.emit('messageError', { message: 'Failed to send message' });
         }
     });
 
-    // Typing indicator
     socket.on('typing', ({ receiverId }) => {
         const receiverSocket = onlineUsers.get(receiverId);
         if (receiverSocket) {
@@ -114,7 +116,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Disconnect
     socket.on('disconnect', () => {
         if (socket.userId) {
             onlineUsers.delete(socket.userId);
