@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = "force-dynamic";
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
@@ -153,8 +154,8 @@ export default function ChatPage() {
                                             return (
                                                 <div key={msg._id || i} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                                     <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl text-sm ${isMe
-                                                            ? 'bg-primary-500 text-white rounded-br-sm'
-                                                            : 'bg-white/10 text-dark-200 rounded-bl-sm'
+                                                        ? 'bg-primary-500 text-white rounded-br-sm'
+                                                        : 'bg-white/10 text-dark-200 rounded-bl-sm'
                                                         }`}>
                                                         <p>{msg.content}</p>
                                                         <p className={`text-[10px] mt-1 ${isMe ? 'text-primary-200' : 'text-dark-500'}`}>
