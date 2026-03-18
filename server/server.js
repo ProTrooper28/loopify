@@ -17,12 +17,6 @@ const chatRoutes = require('./routes/chatRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
-// ✅ Allowed origins (IMPORTANT FIX)
-const allowedOrigins = [
-    "http://localhost:3000",
-    "https://loopify-wi9n.vercel.app"
-];
-
 // Initialize app
 const app = express();
 const server = http.createServer(app);
@@ -30,14 +24,15 @@ const server = http.createServer(app);
 // ✅ Socket.IO setup (FIXED)
 const io = new Server(server, {
     cors: {
-        origin: allowedOrigins,
-        methods: ['GET', 'POST']
+        origin: true,
+        methods: ['GET', 'POST'],
+        credentials: true
     }
 });
 
-// ✅ Middleware (FIXED CORS)
+// ✅ Middleware (FIXED CORS — FINAL)
 app.use(cors({
-    origin: allowedOrigins,
+    origin: true,
     credentials: true
 }));
 
@@ -133,13 +128,12 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start server
+// ✅ Start server (FIXED for Render)
 const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
-    server.listen(PORT, () => {
-        console.log(`\n🚀 Loopify Server running on port ${PORT}`);
-        console.log(`📡 API: http://localhost:${PORT}/api`);
-        console.log(`💬 Socket.IO: ws://localhost:${PORT}\n`);
+    server.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 Loopify Server running on port ${PORT}`);
+        console.log(`📡 API: https://loopify-2.onrender.com/api`);
     });
 });
