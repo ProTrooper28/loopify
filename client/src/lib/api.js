@@ -4,19 +4,16 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 const apiFetch = async (endpoint, options = {}) => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('loopify_token') : null;
 
+    const isFormData = options.body instanceof FormData;
+
     const config = {
+        ...options,
         headers: {
-            'Content-Type': 'application/json',
             ...(token && { Authorization: `Bearer ${token}` }),
+            ...(!isFormData && { 'Content-Type': 'application/json' }),
             ...options.headers,
         },
-        ...options,
     };
-
-    // Remove Content-Type for FormData
-    if (options.body instanceof FormData) {
-        delete config.headers['Content-Type'];
-    }
 
     const res = await fetch(`${API_URL}${endpoint}`, config);
 
